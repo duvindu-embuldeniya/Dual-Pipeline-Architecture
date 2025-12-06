@@ -1,0 +1,134 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/var/www/<project>
+ExecStart=/home/ubuntu/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          simply.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+server {
+    listen 80;
+    server_name <server_ip>;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/<project>
+ExecStart=/root/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          simply.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+server {
+    listen 80;
+    server_name <server_ip>;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//make keys as Jenkins user
+ssh-keygen -t rsa -b 4096 -C "jenkins-deploy"
+
+
+//Copy the PRIVATE KEY
+cat ~/.ssh/id_rsa
+
+
+---Add this private key to Jenkins Credentials---
+//Go to
+Jenkins Dashboard → Manage Jenkins → Credentials
+
+
+//Select "Global" credentials store
+(global) → Add Credentials
+
+
+//Choose credential type
+Kind: SSH Username with private key
+Username: jenkins 
+
+
+//Under Private Key, select ->Enter directly
+--Paste the entire private key from your EC2(B):--
+-----BEGIN OPENSSH PRIVATE KEY-----
+...your key here...
+-----END OPENSSH PRIVATE KEY-----
+
+
+--Give it an ID--
+ec2-jenkins-key
+
+stage('Deploy') {
+    steps {
+        sshagent(['ec2-jenkins-key']) {
+            sh 'ssh ubuntu@<EC2_A_PUBLIC_IP> -o StrictHostKeyChecking=no "bash /var/www/project5/scripts/deploy.sh"'
+        }
+    }
+}
+
+
+
+//Copy the public KEY to EC2(A)
+cat ~/.ssh/id_rsa.pub
+
+
+//Set correct permissions ON EC2(A)
+mkdir -p ~/.ssh
+nano ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+
+
+
+
+
+
+
