@@ -1,0 +1,24 @@
+<VirtualHost *:80>
+    ServerName <Enter IP address OR domain name>
+
+    DocumentRoot /home/ubuntu/dev
+
+    # Environment variables
+    SetEnv VARIABLE value
+
+    # WSGI configuration
+    WSGIDaemonProcess simply python-path=/home/ubuntu/dev python-home=/home/ubuntu/dev/venv
+    WSGIProcessGroup simply
+    WSGIScriptAlias / /home/ubuntu/dev/simply/wsgi.py
+
+    # Directory permissions for the application
+    <Directory /home/ubuntu/dev/simply>
+        Require all granted
+    </Directory>
+
+    # Static files configuration
+    Alias /static/ /home/ubuntu/dev/staticfiles/
+    <Directory /home/ubuntu/dev/staticfiles>
+        Require all granted
+    </Directory>
+</VirtualHost>
