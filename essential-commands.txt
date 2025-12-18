@@ -1,15 +1,10 @@
 default-ec2 (ubuntu)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-[Unit]
-Description=gunicorn daemon
-Requires=gunicorn.socket
-After=network.target
-
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/var/www/<project>
+WorkingDirectory=/var/www/<project>
 ExecStart=/home/ubuntu/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
