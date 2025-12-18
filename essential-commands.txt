@@ -1,3 +1,5 @@
+default-ec2 (ubuntu)
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 [Unit]
 Description=gunicorn daemon
@@ -8,7 +10,7 @@ After=network.target
 User=root
 Group=www-data
 WorkingDirectory=/var/www/<project>
-ExecStart=/root/venv/bin/gunicorn \
+ExecStart=/home/ubuntu/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
           --bind unix:/run/gunicorn.sock \
@@ -20,6 +22,9 @@ WantedBy=multi-user.target
 
 
 
+
+
+# app.duvindu.org → App's default page...////////////////////////////////////////////////
 server {
     listen 80;
     server_name <server_ip>;
@@ -29,6 +34,24 @@ server {
     location / {
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+
+
+
+
+# jenkins.duvindu.org → Jenkins (8080)...////////////////////////////////////////////////
+server {
+    listen 80;
+    server_name jenkins.duvindu.org;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
