@@ -9,7 +9,7 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/var/www/<project>
+WorkingDirectory=/home/ubuntu/var/www/<project>
 ExecStart=/home/ubuntu/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
